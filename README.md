@@ -1,9 +1,9 @@
-#### Install LEMP Stack Ubuntu
+# Install LEMP Stack Ubuntu
 
 Cara install LEMP Stack (Linux, Nginx, MySQL, Php)
 
 
-#### Edit Variable di `vars/vars.yaml`
+# Edit Variable di `vars/vars.yaml`
 
 Edit sesuai dengan kebutuhan
 
@@ -13,7 +13,7 @@ Edit sesuai dengan kebutuhan
 
 `http_host` untuk domain atau IP
 
-### Edit Host yang akan di remote di `hosts.yaml`
+# Edit Host yang akan di remote di `hosts.yaml`
 
 `ansible_user` user server target
 
@@ -21,7 +21,7 @@ Edit sesuai dengan kebutuhan
 
 `192.168.99.11` ganti dengan IP server target
 
-### Jalankan Ansible
+# Jalankan Ansible
 
 ```
 ansible-playbook -i hosts.yaml main.yaml
