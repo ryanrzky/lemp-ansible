@@ -1,0 +1,77 @@
+---
+- hosts: webserver
+  vars_files:
+  - vars/vars.yaml
+
+  tasks:
+    - name: Update System
+      apt:
+        update_cache: yes
+    - name: Add Repo Php
+      apt_repository:
+        repo: ppa:ondrej/php
+    - name: Install Nginx
+      apt: 
+        name: nginx
+        state: latest  
+    - name: Install Php-Fpm
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop: ['php{{ php_version }}-fpm', 'php{{ php_version }}-common', 'php{{ php_version }}-xml', 'php{{ php_version }}-zip', 'php{{ php_version }}-mysql', 'php{{ php_version }}-mbstring', 'php{{ php_version }}-json', 'php{{ php_version }}-curl', 'php{{ php_version }}-gd', 'php{{ php_version }}-pgsql']
+    - name: Install MySQL
+      apt:
+        name: 
+          - mysql-server
+          - mysql-client
+          - python3-pymysql
+          - libmysqlclient-dev
+        state: latest
+    - name: Start MySQL
+      service:
+        name: mysql
+        state: started
+    - name: Set root password MySQL
+      mysql_user:
+        name: root
+        host: "{{ item }}"
+        password: "{{ mysql_root_password }}"
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+      with_items:
+        - 127.0.0.1
+        - ::1
+        - localhost
+    - name: Removes all anonymous user accounts
+      mysql_user:
+        name: ''
+        host_all: yes
+        state: absent
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
+    - name: Removes the MySQL test database
+      mysql_db: 
+        name: test 
+        state: absent
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
+    - name: Change index.html Nginx
+      template:
+        src: "templates/index.html.j2"
+        dest: "/var/www/html/index.nginx-debian.html"
+    - name: Configure VirtualHost Nginx
+      template:
+        src: "templates/site.conf.j2"
+        dest: "/etc/nginx/sites-available/site.conf"
+    - name: Enable VirtualHost
+      file:
+        src: "/etc/nginx/sites-available/site.conf"
+        dest: "/etc/nginx/sites-enabled/site.conf"
+        state: link
+    - name: Remove Default Site
+      file:
+        path: "/etc/nginx/sites-enabled/default"
+        state: absent
+    - name: restart nginx
+      service: 
+        name: nginx
+        state: restarted

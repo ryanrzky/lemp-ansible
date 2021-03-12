@@ -1,0 +1,10 @@
+all:
+    vars:
+        ansible_connection: ssh
+        ansible_user: root
+        ansible_ssh_pass: root123
+        ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
+    children:
+        webserver:
+            hosts:
+              192.168.89.11:
